@@ -1,0 +1,14 @@
+.editor-inner {
+    
+    margin: 50px auto 50px auto;
+    width: 45%;
+    height: 350px;
+    max-width: 600px;
+    color: #000;
+    position: relative;
+    line-height: 20px;
+    font-weight: 400;
+    text-align: left;
+    border-radius: 10px;
+    background: #fff;
+}
