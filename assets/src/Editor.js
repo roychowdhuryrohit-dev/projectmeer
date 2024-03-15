@@ -10,9 +10,11 @@ import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {OnChangePlugin} from '@lexical/react/LexicalOnChangePlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import Diff from './diff'
 
 import './Editor.css'
 
+const [previousEditorState, setPreviousEditorState] = useState(null);
 
 
 function MyOnChangePlugin({ onChange }) {
@@ -43,12 +45,25 @@ function Editor() {
     root.append(paragraphNode);
   });
   
-  function onChange(editorState) {
-    // Call toJSON on the EditorState object, which produces a serialization safe string
-    const editorStateJSON = editorState.toJSON();
-    // However, we still have a JavaScript object, so we need to convert it to an actual string with JSON.stringify
-    setEditorState(JSON.stringify(editorStateJSON));
+  function updateEditorState(editorState) {
+    editorState.update(() => {
+      if (previousEditorState.editorState.editorState === undefined) {
+        setPreviousEditorState(editorState);
+        return;
+      }
+      oldText = previousEditorState.$getRoot().getTextContent();
+      newText = editorState.$getRoot().getTextContent();
+    
+      root.clear();
+      const paragraph = $createParagraphNode();
+      paragraph.append($createTextNode(newText));
+      root.append(paragraph);
+      
+      setEditorState(editorState);
+    });
   }
+
+
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-inner">
@@ -57,9 +72,11 @@ function Editor() {
         placeholder={<div>Enter some text...</div>}
         ErrorBoundary={LexicalErrorBoundary}
       />
+     
       <HistoryPlugin />
-      <MyOnChangePlugin onChange={onChange}/>
+      <MyOnChangePlugin onChange={updateEditorState}/>
       </div>
+
     </LexicalComposer>
   );
 }
