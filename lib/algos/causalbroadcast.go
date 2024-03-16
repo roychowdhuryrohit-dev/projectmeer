@@ -3,14 +3,18 @@ package algos
 import (
 	"bytes"
 	"encoding/gob"
+	"log"
+	"net/http"
 	"slices"
+
+	config "github.com/roychowdhuryrohit-dev/projectmeer/lib"
 )
 
 type Message struct {
-	sender  int
-	deps    []int
-	msg     []byte
-	msgType string
+	Sender  int
+	Deps    []int
+	Msg     []byte
+	MsgType string
 }
 
 type CPrimitive[T any] interface {
@@ -35,20 +39,30 @@ func (cb *CausalBroadcast[T]) SendPrimitive(msg []byte, msgType string) error {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(Message{
-		sender:  cb.curNode,
-		deps:    deps,
-		msg:     msg,
-		msgType: msgType,
+		Sender:  cb.curNode,
+		Deps:    deps,
+		Msg:     msg,
+		MsgType: msgType,
 	})
 	if err != nil {
 		return err
 	}
-	cb.Send(buf.Bytes())
-	return nil
+
+	return cb.Send(buf.Bytes())
 }
 
-// TODO
 func (cb *CausalBroadcast[T]) Send(encMsg []byte) error {
+	prefix := "http://"
+	path := "/p2p/receivePrimitive"
+	for _, node := range config.NodeList {
+		buf := bytes.NewBuffer(encMsg)
+		_, err := http.Post(prefix+node+path, "application/octet-stream", buf)
+		if err != nil {
+			return err
+		}
+
+	}
+	cb.sendSeq += 1
 	return nil
 }
 
@@ -57,14 +71,20 @@ func (cb *CausalBroadcast[T]) Receive(encMsg []byte) error {
 	dec := gob.NewDecoder(buf)
 	msg := Message{}
 	if err := dec.Decode(&msg); err != nil {
+		log.Println(err.Error())
 		return err
 	}
 	cb.buffer = append(cb.buffer, msg)
 	for i, m := range cb.buffer {
-		if cb.isCausal(m.deps, cb.delivered) {
-			(*(cb.cp)).ReceivePrimitive(m.msg, m.msgType)
+		log.Printf("%+v %+v %+v", m.Deps, cb.delivered, cb.isCausal(m.Deps, cb.delivered))
+		if cb.isCausal(m.Deps, cb.delivered) {
+			err := (*(cb.cp)).ReceivePrimitive(m.Msg, m.MsgType)
+			if err != nil {
+				log.Println(err.Error())
+			}
 			cb.buffer = slices.Delete(cb.buffer, i, i+1)
-			cb.delivered[m.sender] += 1
+			cb.delivered[m.Sender] += 1
+
 		}
 	}
 

@@ -9,10 +9,11 @@ import (
 
 const (
 	ReplicaID = "REPLICA_ID"
-	NodeList = "NODE_LIST"
+	NodeListValue  = "NODE_LIST"
 )
 
 var ConfigMap sync.Map
+var NodeList []string
 
 func Config() {
 
@@ -29,16 +30,14 @@ func Config() {
 		default:
 			ConfigMap.Store(ReplicaID, envar)
 		}
-	}
-
-	if envar, ok := os.LookupEnv(NodeList); ok && envar != "" {
-		ConfigMap.Store(NodeList, envar)
 	} else {
-		log.Fatalf("%s not set", NodeList)
+		log.Panicf("%s not set", ReplicaID)
 	}
 
-
-	
-
+	if envar, ok := os.LookupEnv(NodeListValue); ok && envar != "" {
+		ConfigMap.Store(NodeListValue, envar)
+	} else {
+		log.Panicf("%s not set", NodeListValue)
+	}
 
 }

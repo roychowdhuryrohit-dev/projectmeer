@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"slices"
 
-	config "github.com/roychowdhuryrohit-dev/projectmeer/node-user/lib"
+	config "github.com/roychowdhuryrohit-dev/projectmeer/lib"
 )
 
 type ID struct {
@@ -441,6 +441,7 @@ func NewFugueMax[T any](curNode int, nodeList []string) *FugueMax[T] {
 			buffer:    make([]Message, 0),
 			nodeList:  nodeList,
 			curNode:   curNode,
+			cp: new(CPrimitive[T]),
 		},
 	}
 	*fg.CausalBroadcast.cp = fg
@@ -499,8 +500,8 @@ func (fg *FugueMax[T]) insertOne(index int, value T) error {
 	if err := enc.Encode(msg); err != nil {
 		return err
 	}
-	fg.SendPrimitive(buf.Bytes(), "insert")
-	return nil
+	err := fg.SendPrimitive(buf.Bytes(), "insert")
+	return err
 }
 
 func (fg *FugueMax[T]) Delete(startIndex int, count int) error {
