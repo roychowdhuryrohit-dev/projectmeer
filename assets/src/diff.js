@@ -22,16 +22,16 @@ export function getChangeStartIndex(change) {
     return -1; // Change not found
 }
 
-// Example usage:
-    console.log(oldText);
-    console.log(newText);
+// // Example usage:
+//     console.log(oldText);
+//     console.log(newText);
 
-    for (const d of diff) {
-        if (d.added!== undefined || d.removed!== undefined) {
-        console.log(d);
-        const startIndex = getChangeStartIndex(d);
-        console.log("Start index in old text:", startIndex);
-//After this, get new text from GET request and update state
-    }
-}
+//     for (const d of diff) {
+//         if (d.added!== undefined || d.removed!== undefined) {
+//         console.log(d);
+//         const startIndex = getChangeStartIndex(d);
+//         console.log("Start index in old text:", startIndex);
+// //After this, get new text from GET request and update state
+//     }
+// }
 
