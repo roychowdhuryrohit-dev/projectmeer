@@ -1,19 +1,27 @@
 import './App.css';
 import Editor from './Editor'
-import { useState } from 'react';
-import {QueryClient, QueryClientProvider} from "react-query";
 
-function App() {
-  const queryClient = new QueryClient();
-
+export default function App() {
   return (
-  <QueryClientProvider client={queryClient}>
     <div className="App">
-      
-      <Editor className="editor"/>   
+      <h1>Meer</h1>
+      <p>A collaborative peer-to-peer text editor</p>
+      <Editor />
+      <div className="other">
+        <h2>Node List</h2>
+        <ul>
+          <li>
+            <a
+              href="https://codesandbox.io/s/lexical-rich-text-example-5tncvy"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Rich text example
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
-    </QueryClientProvider>
   );
 }
 
-export default App;

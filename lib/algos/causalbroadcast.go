@@ -76,7 +76,6 @@ func (cb *CausalBroadcast[T]) Receive(encMsg []byte) error {
 	}
 	cb.buffer = append(cb.buffer, msg)
 	for i, m := range cb.buffer {
-		log.Printf("%+v %+v %+v", m.Deps, cb.delivered, cb.isCausal(m.Deps, cb.delivered))
 		if cb.isCausal(m.Deps, cb.delivered) {
 			err := (*(cb.cp)).ReceivePrimitive(m.Msg, m.MsgType)
 			if err != nil {

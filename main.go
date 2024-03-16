@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	config "github.com/roychowdhuryrohit-dev/projectmeer/lib"
 	"github.com/roychowdhuryrohit-dev/projectmeer/lib/algos"
 	"github.com/roychowdhuryrohit-dev/projectmeer/lib/routes"
@@ -30,7 +31,7 @@ func main() {
 	}
 	config.NodeList = nodeList
 	fg := algos.NewFugueMax[rune](curNode, nodeList)
-	r := setupServer(fg)
+	r := setupServer(fg, replicaID.(string))
 
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -55,11 +56,19 @@ func main() {
 	srv.Shutdown(ctx)
 }
 
-func setupServer(fg *algos.FugueMax[rune]) chi.Router {
+func setupServer(fg *algos.FugueMax[rune], origin string) chi.Router {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	//r.Get("/",...) TODO: Host static homepage
-
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://" + origin},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
+	fs := http.FileServer(http.Dir("./assets/build"))
+	r.Handle("/*", fs)
 	r.Mount("/web", webRoutes(fg))
 	r.Mount("/p2p", p2pRoutes(fg))
 	return r

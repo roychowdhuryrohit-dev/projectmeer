@@ -3,6 +3,7 @@
 all: local
 
 build_local:
+	@cd assets && npm run build
 	@go build -o bin/meer
 run_local:
 	@. ./.env && ./bin/meer

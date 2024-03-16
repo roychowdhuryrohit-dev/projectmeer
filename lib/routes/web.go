@@ -8,6 +8,7 @@ import (
 	"github.com/roychowdhuryrohit-dev/projectmeer/lib/algos"
 )
 
+
 func InsertText(fg *algos.FugueMax[rune]) http.HandlerFunc {
 	type InsertTextRequest struct {
 		Index int    `json:"index"`
