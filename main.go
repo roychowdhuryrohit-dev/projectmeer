@@ -79,6 +79,7 @@ func webRoutes(fg *algos.FugueMax[rune]) chi.Router {
 	r.Post("/insertText", routes.InsertText(fg))
 	r.Post("/deleteText", routes.DeleteText(fg))
 	r.Get("/getText", routes.GetText(fg))
+	r.Get("/getNodeList", routes.GetNodeList())
 	return r
 }
 

@@ -4,10 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 	"unicode/utf8"
-
+	"github.com/roychowdhuryrohit-dev/projectmeer/lib"
 	"github.com/roychowdhuryrohit-dev/projectmeer/lib/algos"
 )
 
+func GetNodeList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, ok := config.ConfigMap.Load(config.NodeListValue)
+		if !ok{
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(body)
+		w.WriteHeader(http.StatusOK)
+	}
+}
 
 func InsertText(fg *algos.FugueMax[rune]) http.HandlerFunc {
 	type InsertTextRequest struct {

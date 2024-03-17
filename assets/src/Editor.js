@@ -1,6 +1,6 @@
 import './Editor.css'
 import { $createTextNode, $getRoot, $createParagraphNode } from 'lexical';
-import { useEffect } from 'react';
+import { useEffect, memo } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -56,38 +56,39 @@ const RefreshTextPlugin = ({ setPreviousText, getCanRefresh }) => {
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log(getCanRefresh())
       if (getCanRefresh()) {
         fetch(host + "/web/getText")
           .then(res => res.json())
           .then((res) => {
-            if (setPreviousText(res)) {
-              editor.update(() => {
-                const root = $getRoot();
-                root.clear();
+            editor.update(() => {
+              const root = $getRoot();
+              if (setPreviousText(res)) {
+                // console.log("updating editor", root.getTextContent(), res)
                 const p = $createParagraphNode();
                 p.append($createTextNode(res));
+                root.clear();
                 root.append(p);
+                // console.log("new value", $getRoot().getTextContent());
 
-              });
-            }
+              }
+            });
           })
           .catch((error) => {
-            console.log(error)
+            window.location.reload()
           });
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 }
 
-export default function Editor() {
+export default memo(function Editor() {
   let previousText = null;
   let canRefresh = true;
 
   const setPreviousText = (t) => {
-    if (previousText === t) {
+    if (previousText == t) {
       return false
     }
     previousText = t
@@ -100,42 +101,48 @@ export default function Editor() {
   const editorConfig = {
     namespace: 'Meer',
     onError: (e) => {
-      console.log('ERROR:', e)
+      console.log(e)
     }
   };
 
   const updateEditorState = (editorState) => {
 
-    editorState.read(() => {
+    editorState.read(async () => {
       setCanRefresh(false)
+      let newText = $getRoot().getTextContent();
       if (previousText === null || previousText === undefined) {
-        setPreviousText($getRoot().getTextContent());
+        previousText = newText.trim()
+        // console.log("prevtext first value", previousText)
         setCanRefresh(true)
         return;
       }
-      if (previousText === $getRoot().getTextContent()) {
+      // console.log(previousText, " - ", newText)
+      if (previousText === newText) {
         setCanRefresh(true)
         return;
       }
-      const newText = $getRoot().getTextContent();
       const diff = JsDiff.diffChars(previousText, newText);
 
-
       for (let d of diff) {
-        console.log(d);
-
+        // console.log(d);
+        let dValue = d.value
         if (d.added) {
+          if (d.value.length != 1) {
+            dValue = d.value.slice(0, -2)
+            newText = previousText + dValue
+          }
           const startIndex = getChangeStartIndex(diff, d);
-          console.log("Start index in old text:", startIndex);
-          insertTextApi(startIndex, d.value)
+          // console.log("Insertion - Start index in old text:", startIndex);
+          await insertTextApi(startIndex, dValue)
 
         } else if (d.removed) {
           const startIndex = getChangeStartIndex(diff, d);
-          console.log("Start index in old text:", startIndex);
-          deleteTextApi(startIndex, 1)
+          // console.log("Deletion - Start index in old text:", startIndex);
+          await deleteTextApi(startIndex, d.count)
         }
       }
-      setPreviousText(newText);
+      // console.log("refresh true")
+      previousText = newText
       setCanRefresh(true)
     });
   };
@@ -153,7 +160,7 @@ export default function Editor() {
       </div>
     </LexicalComposer>
   );
-}
+});
 
 function Placeholder() {
   return <div className="editor-placeholder">Enter some text...</div>;
