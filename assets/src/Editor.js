@@ -8,7 +8,7 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 const JsDiff = require('diff');
 
-const host = "http://" + window.location.host
+const host =  window.location.href
 
 
 const insertTextApi = async (idx, vl) => {
@@ -19,7 +19,7 @@ const insertTextApi = async (idx, vl) => {
     },
     body: JSON.stringify({ index: idx, value: vl })
   };
-  const response = await fetch(host + "/web/insertText", requestOptions);
+  const response = await fetch(host + "web/insertText", requestOptions);
   return response.ok
 };
 
@@ -31,7 +31,7 @@ const deleteTextApi = async (idx, ct) => {
     },
     body: JSON.stringify({ index: idx, count: ct })
   };
-  const response = await fetch(host + "/web/deleteText", requestOptions);
+  const response = await fetch(host + "web/deleteText", requestOptions);
   return response.ok
 };
 
@@ -57,7 +57,7 @@ const RefreshTextPlugin = ({ setPreviousText, getCanRefresh }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (getCanRefresh()) {
-        fetch(host + "/web/getText")
+        fetch(host + "web/getText")
           .then(res => res.json())
           .then((res) => {
             editor.update(() => {

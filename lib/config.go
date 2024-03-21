@@ -10,6 +10,7 @@ import (
 const (
 	ReplicaID = "REPLICA_ID"
 	NodeListValue  = "NODE_LIST"
+	Port ="PORT"
 )
 
 var ConfigMap sync.Map
@@ -38,6 +39,12 @@ func Config() {
 		ConfigMap.Store(NodeListValue, envar)
 	} else {
 		log.Panicf("%s not set", NodeListValue)
+	}
+
+	if envar, ok := os.LookupEnv(Port); ok && envar != "" {
+		ConfigMap.Store(Port, envar)
+	} else {
+		log.Panicf("%s not set", Port)
 	}
 
 }

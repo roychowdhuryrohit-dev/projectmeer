@@ -24,7 +24,8 @@ func main() {
 	nodeListValue, _ := config.ConfigMap.Load(config.NodeListValue)
 	nodeList := strings.Split(nodeListValue.(string), ",")
 	replicaID, _ := config.ConfigMap.Load(config.ReplicaID)
-	port := strings.Split(replicaID.(string), ":")[1]
+	port, _ := config.ConfigMap.Load(config.Port)
+
 	curNode := slices.Index(nodeList, replicaID.(string))
 	if curNode == -1 {
 		log.Panicln("invalid replica id")
@@ -37,7 +38,7 @@ func main() {
 	signal.Notify(exit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	srv := &http.Server{
-		Addr:    ":" + port,
+		Addr:    ":" + port.(string),
 		Handler: r,
 	}
 	go func() {

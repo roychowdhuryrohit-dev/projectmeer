@@ -6,7 +6,7 @@ const NodeList = memo(
   () => {
     const [nodeList, setnodeList] = useState([]);
     useEffect(() => {
-      fetch("http://" + window.location.host + "/web/getNodeList")
+      fetch(window.location.href + "web/getNodeList")
         .then((res) => {
           return res.json();
         })
@@ -29,7 +29,7 @@ const NodeList = memo(
               return (
                 <li>
                   <a
-                    href={`http://${nodeUrl}`}
+                    href={`${nodeUrl}`}
                     target="_blank"
                     rel="noreferrer"
                   >

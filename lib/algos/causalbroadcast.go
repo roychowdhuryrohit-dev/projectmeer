@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"strings"
 
 	config "github.com/roychowdhuryrohit-dev/projectmeer/lib"
 )
@@ -53,10 +54,14 @@ func (cb *CausalBroadcast[T]) SendPrimitive(msg []byte, msgType string) error {
 
 func (cb *CausalBroadcast[T]) Send(encMsg []byte) error {
 	prefix := "http://"
+	prefix_secure := "https://"
 	path := "/p2p/receivePrimitive"
 	for _, node := range config.NodeList {
 		buf := bytes.NewBuffer(encMsg)
-		_, err := http.Post(prefix+node+path, "application/octet-stream", buf)
+		if !strings.HasPrefix(node, prefix) && !strings.HasPrefix(node, prefix_secure) {
+			node = prefix + node
+		}
+		_, err := http.Post(node+path, "application/octet-stream", buf)
 		if err != nil {
 			return err
 		}
