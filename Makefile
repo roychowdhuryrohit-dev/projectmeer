@@ -14,7 +14,7 @@ build_docker:
 	docker images meer
 run_docker:
 	. ./.env && \
-	docker run --env REPLICA_ID=$$REPLICA_ID --env NODE_LIST=$$NODE_LIST -p 80:80 meer
+	docker run --env REPLICA_ID=$$REPLICA_ID --env NODE_LIST=$$NODE_LIST --env PORT=$$PORT -p 80:80 meer
 clean_docker:
 	docker container kill $$(docker container ls -aq); \
 	docker rm $$(docker ps -a -q) \
